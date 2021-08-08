@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MovementForce: 5
-  JumpForce: 10
+  JumpForce: 6
   RigidBody: {fileID: 7012591406530522305}
   PlayerCollider: {fileID: 1046728621437235355}
 --- !u!65 &1046728621437235355
