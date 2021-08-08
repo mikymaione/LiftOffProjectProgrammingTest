@@ -25,61 +25,67 @@ public class LevelProceduralGeneration : MonoBehaviour
     public int MountainMaxHeigth = 1;
 
 
-    private int _mountainMaxWidth;
-
-    private Random _rnd = new Random(DateTime.Now.Second);
+    private readonly Random _rnd = new Random(DateTime.Now.Second);
 
 
     void Start()
     {
         //w = 2h - 1
-        _mountainMaxWidth = 2 * MountainMaxHeigth - 1;
+        var mountainMaxWidth = 2 * MountainMaxHeigth - 1;
 
         int x, y;
         var spaceAvailable = TerrainLength;
         var map = new bool[TerrainLength, TerrainDepth + MountainMaxHeigth];
 
-        // fill the ground
+        // fill the ground map
         for (x = 0; x < TerrainLength; x++)
             for (y = 0; y < TerrainDepth; y++)
                 map[x, y] = true;
 
+        // generate the mountains map
         x = 0;
         y = TerrainDepth;
-        while (spaceAvailable > 0)
+        while (spaceAvailable > 1)
         {
-            var mountainX = _rnd.Next(1, _mountainMaxWidth);
-            var mountainW = _rnd.Next(1, _mountainMaxWidth);
+            var mountainX = _rnd.Next(1, mountainMaxWidth + 1);
+            var mountainH = _rnd.Next(1, MountainMaxHeigth + 1);
+            var mountainW = 2 * mountainH - 1;
 
-            generateMountain(ref map, x + mountainX, y, mountainW);
+            var spaceRequired = mountainX + mountainW;
 
-            x = mountainX + mountainW;
-            spaceAvailable -= x;
+            if (spaceAvailable < spaceRequired)
+                break;
+
+            spaceAvailable -= spaceRequired;
+
+            GenerateMountain(ref map, x + mountainX, y, mountainH);
+
+            x += spaceRequired;
         }
 
+        // place the cube from the map
         for (x = 0; x < TerrainLength; x++)
-            for (y = 0; y < TerrainDepth; y++)
+            for (y = 0; y < TerrainDepth + MountainMaxHeigth; y++)
                 if (map[x, y])
                 {
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.position = new Vector3(x, y, 0);
+                    cube.transform.tag = "Ground";
                 }
     }
 
-    private void generateMountain(ref bool[,] map, int x, int y, int w)
+    private static void GenerateMountain(ref bool[,] map, int x, int y, int h)
     {
         var step = 0;
-        var h = (w + 1) / 2;
 
         for (var j = 0; j < h; j++)
         {
-            for (var i = step; i < w; i++)
-            {
-                map[x + i, y + j] = true;
-            }
+            var w = 2 * (h - j) - 1;
+
+            for (var i = 0; i < w; i++)
+                map[x + i + step, y + j] = true;
 
             step++;
-            w = 2 * (h - j) - 1;
         }
     }
 

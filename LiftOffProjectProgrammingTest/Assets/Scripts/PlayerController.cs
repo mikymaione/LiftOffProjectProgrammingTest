@@ -22,9 +22,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody RigidBody;
     public Collider PlayerCollider;
 
-
-    private bool _isJumping = false;
-    private float _horizontalDirection, _verticalDirection;
+    private bool _isJumping;
 
 
     void Start()
@@ -36,22 +34,22 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // get horizontal direction
-        _horizontalDirection = Input.GetAxis("Horizontal");
-        _verticalDirection = Input.GetAxis("Vertical");
+        var horizontalDirection = Input.GetAxis("Horizontal");
+        var verticalDirection = Input.GetAxis("Vertical");
 
-        if (!_isJumping && _verticalDirection > 0)
+        if (!_isJumping && verticalDirection > 0)
         {
             _isJumping = true;
             RigidBody.AddForce(0, JumpForce, 0, ForceMode.Impulse);
         }
 
         // move the player
-        transform.Translate(new Vector3(_horizontalDirection * MovementForce, 0, 0) * Time.deltaTime);
+        transform.Translate(horizontalDirection * MovementForce * Time.deltaTime, 0, 0);
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnCollisionStay(Collision collision)
     {
-        if (collision.transform.tag == "Ground")
+        if (collision.transform.tag == "Ground" && RigidBody.velocity.y == 0)
             _isJumping = false;
     }
 
